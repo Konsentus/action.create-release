@@ -39,14 +39,7 @@ JSON="{\"tag_name\": \"${TAG}\", \"name\": \"${RELEASE_NAME}\"}"
 
 CODE=$(curl -d "${JSON}" -X POST -H "Authorization: token ${TOKEN}" -H "Content-Type: application/json" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases")
 
-if [ "${CODE}" != "200" ] && [ "${CODE}" != "201" ]; then
-  >&2 printf "\n\tERR: %s to Github release has failed\n" "${METHOD}"
-  >&2 jq < "/tmp/${METHOD}.json"
-  exit 1
-fi
-
-RELEASE_ID="$(jq '.id' < "/tmp/${METHOD}.json")"
-echo "${RELEASE_ID} came out"
+echo $CODE
 #
 # ## Handle, and prepare assets
 # #
