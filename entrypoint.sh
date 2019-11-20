@@ -18,18 +18,6 @@ fi
 # Try getting $TAG from action input
 TAG=INPUT_NEW_VERSION_TAG
 
-# [fallback] Try getting $TAG from ENVironment VARiable
-#   NOTE: Can be set in a step before using ex:
-#     echo ::set-env name=RELEASE_TAG::"v1.0.0"
-if [ -z "${TAG}" ]; then
-  TAG="${RELEASE_TAG}"
-fi
-
-# [fallback] Try getting $TAG from Github context (only works on git-tag push action)
-if [ -z "${TAG}" ]; then
-  TAG="$(echo "${GITHUB_REF}" | grep 'refs/tags/' | awk -F/ '{print $NF}')"
-fi
-
 # If all ways of getting the TAG failed, exit with an error
 if [ -z "${TAG}" ]; then
   >&2 printf "\nERR: Invalid input: 'tag' is required, and must be specified.\n"
@@ -43,82 +31,13 @@ if [ -z "${TAG}" ]; then
   exit 1
 fi
 
-# # Verify that gzip: option is set to any of the allowed values
-# if [ "${INPUT_GZIP}" != "true" ] && [ "${INPUT_GZIP}" != "false" ] && [ "${INPUT_GZIP}" != "folders" ]; then
-#   >&2 printf "\nERR: Invalid input: 'gzip' can only be not set, or one of: true, false, folders\n"
-#   >&2 printf "\tNote: It defines what to do with assets before uploading them.\n\n"
-#   >&2 printf "Try:\n"
-#   >&2 printf "\tuses: repoloc/test.reponame/github-release@TAG\n"
-#   >&2 printf "\twith:\n"
-#   >&2 printf "\t  gzip: true\n"
-#   >&2 printf "\t  ...\n"
-#   exit 1
-# fi
-
 BASE_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases"
 echo "BASE_URL: ${BASE_URL}"
-#
-## Check for Github Release existence
-#
-echo "generating release id"
-RELEASE_ID="$(curl -H "Authorization: token ${TOKEN}"  "${BASE_URL}/tags/${TAG}" | jq -r '.id | select(. != null)')"
-
-if [ -n "${RELEASE_ID}" ] && [ "${INPUT_ALLOW_OVERRIDE}" != "true" ]; then
-  >&2 printf "\nERR: Release '%s' already exists, and overriding is not allowed.\n" "${TAG}"
-  >&2 printf "\tNote: Either use different 'tag:' name, or 'allow_override:'\n\n"
-  >&2 printf "Try:\n"
-  >&2 printf "\tuses: repoloc/test.reponame/github-release@TAG\n"
-  >&2 printf "\twith:\n"
-  >&2 printf "\t  ...\n"
-  >&2 printf "\t  allow_override: true\n"
-  exit 1
-fi
-
 RELEASE_NAME="Release ${TAG}"
-# If no `name:` passed as input, but RELEASE_NAME env var is set, use it as the name
-if [ -z "${INPUT_NAME}" ] && [ -n "${RELEASE_NAME}" ]; then
-  INPUT_NAME="${RELEASE_NAME}"
-fi
 
-#
-## Create, or update release on Github
-#
-# For a given string return either `null` (if empty), or `"quoted string"` (if not)
-toJsonOrNull() {
-  if [ -z "$1" ]; then
-    echo null
-    return
-  fi
+JSON="{\"tag_name\": \"${TAG}\", \"name\": \"${RELEASE_NAME}\"}"
 
-  if [ "$1" = "true" ] || [ "$1" = "false" ]; then
-    echo "$1"
-    return
-  fi
-
-  echo "\"$1\""
-}
-
-METHOD="POST"
-URL="${BASE_URL}"
-if [ -n "${RELEASE_ID}" ]; then
-  METHOD="PATCH"
-  URL="${URL}/${RELEASE_ID}"
-fi
-
-# Creating the object in a PATCH-friendly way
-CODE="$(jq -nc \
-  --arg tag_name              "${TAG}" \
-  --argjson target_commitish  "$(toJsonOrNull "${INPUT_COMMITISH}")"  \
-  --argjson name              "$(toJsonOrNull "${INPUT_NAME}")"       \
-  --argjson body              "$(toJsonOrNull "${INPUT_BODY}")"       \
-  --argjson draft             "$(toJsonOrNull "${INPUT_DRAFT}")"      \
-  --argjson prerelease        "$(toJsonOrNull "${INPUT_PRERELEASE}")" \
-  '{$tag_name, $target_commitish, $name, $body, $draft, $prerelease} | del(.[] | nulls)' | \
-  curl -s -X "${METHOD}" -d @- \
-  --write-out "%{http_code}" -o "/tmp/${METHOD}.json" \
-  -H "Authorization: token ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  "${URL}")"
+CODE=$(curl -d "${JSON}" -X POST -H "Authorization: token ${TOKEN}" -H "Content-Type: application/json" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases")
 
 if [ "${CODE}" != "200" ] && [ "${CODE}" != "201" ]; then
   >&2 printf "\n\tERR: %s to Github release has failed\n" "${METHOD}"
