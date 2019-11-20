@@ -1,11 +1,9 @@
 #!/bin/sh -l
 
-# set -e
-
 #
 # Input verification
 #
-TOKEN=""
+TOKEN=INPUT_TOKEN
 if [ -z "${TOKEN}" ]; then
   >&2 printf "\nERR: Invalid input: 'token' is required, and must be specified.\n"
   >&2 printf "\tNote: It's necessary to interact with Github's API.\n\n"
@@ -18,7 +16,7 @@ if [ -z "${TOKEN}" ]; then
 fi
 
 # Try getting $TAG from action input
-TAG="v1.10.0"
+TAG=INPUT_NEW_VERSION_TAG
 
 # [fallback] Try getting $TAG from ENVironment VARiable
 #   NOTE: Can be set in a step before using ex:
@@ -57,7 +55,7 @@ fi
 #   exit 1
 # fi
 
-BASE_URL="https://api.github.com/repos/repoloc/test.reponame/releases"
+BASE_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases"
 
 #
 ## Check for Github Release existence
@@ -76,14 +74,11 @@ if [ -n "${RELEASE_ID}" ] && [ "${INPUT_ALLOW_OVERRIDE}" != "true" ]; then
   exit 1
 fi
 
-
 RELEASE_NAME="Release ${TAG}"
 # If no `name:` passed as input, but RELEASE_NAME env var is set, use it as the name
 if [ -z "${INPUT_NAME}" ] && [ -n "${RELEASE_NAME}" ]; then
   INPUT_NAME="${RELEASE_NAME}"
 fi
-
-
 
 #
 ## Create, or update release on Github
