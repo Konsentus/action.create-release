@@ -3,7 +3,7 @@
 #
 # Input verification
 #
-TOKEN=$INPUT_TOKEN
+TOKEN=${INPUT_TOKEN}
 
 if [ -z "${TOKEN}" ]; then
   >&2 printf "\nERR: Invalid input: 'token' is required, and must be specified.\n"
@@ -17,7 +17,7 @@ if [ -z "${TOKEN}" ]; then
 fi
 
 # Try getting $TAG from action input
-TAG=INPUT_NEW_VERSION_TAG
+TAG=${INPUT_NEW_VERSION_TAG}
 
 # If all ways of getting the TAG failed, exit with an error
 if [ -z "${TAG}" ]; then
@@ -40,7 +40,7 @@ JSON="{\"tag_name\": \"${TAG}\", \"name\": \"${RELEASE_NAME}\"}"
 
 CODE=$(curl -d "${JSON}" -X POST -H "Authorization: token ${TOKEN}" -H "Content-Type: application/json" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases")
 
-echo $CODE
+echo ${CODE}
 #
 # ## Handle, and prepare assets
 # #
