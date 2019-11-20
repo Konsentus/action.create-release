@@ -56,7 +56,7 @@ fi
 # fi
 
 BASE_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases"
-
+echo "BASE_URL: ${BASE_URL}"
 #
 ## Check for Github Release existence
 #
