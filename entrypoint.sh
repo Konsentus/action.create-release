@@ -116,7 +116,7 @@ CODE="$(jq -nc \
   '{$tag_name, $target_commitish, $name, $body, $draft, $prerelease} | del(.[] | nulls)' | \
   curl -s -X "${METHOD}" -d @- \
   --write-out "%{http_code}" -o "/tmp/${METHOD}.json" \
-  -H "Authorization: token ${TOKEN}" \
+  -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   "${URL}")"
 
