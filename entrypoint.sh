@@ -3,8 +3,8 @@
 #
 # Input verification
 #
-TOKEN=INPUT_TOKEN
-echo $TOKEN
+TOKEN=$INPUT_TOKEN
+
 if [ -z "${TOKEN}" ]; then
   >&2 printf "\nERR: Invalid input: 'token' is required, and must be specified.\n"
   >&2 printf "\tNote: It's necessary to interact with Github's API.\n\n"
