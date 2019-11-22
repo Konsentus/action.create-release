@@ -47,13 +47,6 @@ fi
 
 JSON=$(jq -n -r --arg tag_name "${TAG}" --arg name "${RELEASE_NAME}" '{tag_name: $tag_name, name: $name}')
 
-if jq -e . >/dev/null 2>&1 <<<"$JSON"; then
-    printf "Parsed JSON successfully and its value is : ${JSON}\n"
-else
-    printf "Failed to parse JSON: ${JSON}\n"
-    exit 1
-fi
-
 STATUS=$(curl -d "${JSON}" -X POST -H "Authorization: token ${TOKEN}" -H "Content-Type: application/json" -o /dev/null -s -w "%{http_code}\n" "${BASE_URL}")
 
 case "$STATUS" in
