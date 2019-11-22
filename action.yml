@@ -1,6 +1,5 @@
 name: Github Release create, update, and upload assets
 description: Github Action to create, update, or add files to Github Releases
-author: "Damian Mee <spam@repoloc/test.reponame.com>"
 
 inputs:
   # Exposed Github API inputs (identical to ones consumed by Github API):
