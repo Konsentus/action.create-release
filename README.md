@@ -33,8 +33,6 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: konsentus/action.create-release@master
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          previous_version_tag: ${{ steps.bump_and_tag.outputs.previous_version_tag }}
           new_version_tag: ${{ steps.bump_and_tag.outputs.new_version_tag }}
 ```
 ## Environment Variables
@@ -42,5 +40,4 @@ jobs:
 
 ## Arguments
 
-- `previous_version_tag`: Github repository previous tag version.
-- `new_version_tag`: Github repository new tag version.
+- `new_version_tag`: New tag to be released in Github.
