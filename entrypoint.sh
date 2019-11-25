@@ -32,7 +32,7 @@ printf "Release name is: $RELEASE_NAME\n"
 #
 # Input verification
 #
-TOKEN=${INPUT_TOKEN}
+TOKEN=${GITHUB_TOKEN}
 
 if [ -z "${TOKEN}" ]; then
   >&2 printf "\nERR: Invalid input: 'token' is required, and must be specified.\n"
